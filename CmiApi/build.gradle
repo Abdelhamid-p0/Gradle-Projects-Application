@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.3'
+}
+
+group = 'org.cmiApi'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+
+    implementation("org.banque:paiement-lib:1.0.0.SNAPSHOT")
+    implementation("org.springframework.boot:spring-boot-starter-web:3.5.3")
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+}
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('productionBuild') {
+    group = "production"
+    description = "Replace bankData.json, build, and run the app"
+
+    doFirst {
+        println "🔁 Remplacement de src/main/resources/data/bankData.json par privé/bankData.json..."
+
+        def sourceFile = file("privé/bankData.json")
+        def targetFile = file("src/main/resources/data/bankData.json")
+
+        if (!sourceFile.exists()) {
+            throw new GradleException("Le fichier source privé/bankData.json est introuvable.")
+        }
+
+        targetFile.parentFile.mkdirs()
+
+        ant.copy(file: sourceFile, tofile: targetFile, overwrite: true)
+
+        println "✅ Remplacement effectué."
+    }
+
+    dependsOn 'build'
+}
