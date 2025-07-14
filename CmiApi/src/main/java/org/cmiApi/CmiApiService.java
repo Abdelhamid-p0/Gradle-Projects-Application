@@ -14,7 +14,7 @@ public class CmiApiService {
     public static ObjectNode getAccess(ObjectNode request) throws IOException {
         int targetId = request.get("id").asInt();
 
-        try (InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/dataBank.json")) {
+        try (InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/bankData.json")) {
             if (is == null) {
                 throw new IOException("Fichier data/dataBank.json introuvable dans les ressources");
             }
@@ -36,8 +36,9 @@ public class CmiApiService {
         String name = transaction.get("name").asText();
         String rib = transaction.get("rib").asText();
         String password = transaction.get("password").asText();
+        System.out.println(transaction);
 
-        try (InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/dataBank.json")) {
+        InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/bankData.json");
             if (is == null) {
                 throw new IOException("Fichier data/dataBank.json introuvable dans les ressources");
             }
@@ -45,13 +46,19 @@ public class CmiApiService {
             JsonNode root = mapper.readTree(is);
             JsonNode banksArray = root.get("banks");
 
+            System.out.println(banksArray);
+
             for (JsonNode bankNode : banksArray) {
                 if (bankNode.get("key").asInt() == targetKey) {
+
                     PaymentBank.authenticate(name, password);
+                   System.out.println("payement success");
                     return PaymentBank.pay(name, rib);
                 }
             }
-        }
+
+        System.out.println("payement not success");
+
         return null;
     }
 }
