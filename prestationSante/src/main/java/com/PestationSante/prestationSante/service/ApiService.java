@@ -78,6 +78,10 @@ public class ApiService {
         transaction.put("rib", rib);
         transaction.put("password", password);
 
+        int randomNumber = new java.util.Random().nextInt(9901) + 100;
+        transaction.put("amount", randomNumber);
+
+
         // Ajouter les données d'accès si disponibles
         if (accessResponse != null && accessResponse.has("key")) {
             transaction.put("key", accessResponse.get("key").asText());

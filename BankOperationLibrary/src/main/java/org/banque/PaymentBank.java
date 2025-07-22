@@ -1,39 +1,56 @@
 package org.banque;
 
-import java.util.Random;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.stereotype.Service;
 
 
-
+@Service
 public class PaymentBank {
 
-    private static final ObjectMapper mapper = new ObjectMapper(); // doit être réutilisé
+    private static final ObjectMapper mapper = new ObjectMapper();
 
-    public static ObjectNode pay(String name, String rib) {
-        System.out.println("Banque 1");
+    BankTransaction bankTransaction;
 
-        int amount = new Random().nextInt(1000) + 1;
+    private String transactionStatus;
 
-        System.out.println("Withdrawal from account of " + name + " in the amount of " + amount);
 
-        // Création d'un ObjectNode via ObjectMapper
-        ObjectNode response = mapper.createObjectNode();
-        response.put("bank", "Banque 1");
-        response.put("name", name);
-        response.put("rib", rib);
-        response.put("amount", amount);
-
-        return response;
+    PaymentBank(BankTransaction bankTransaction) {
+        this.bankTransaction = bankTransaction;
     }
+
 
     public static String authenticate(String name, String password) {
         // simulate hashing the password
         String hashed = DigestUtils.sha256Hex(password);
         System.out.println("Authenticating user " + name + " with hash: " + hashed);
         return hashed;
+    }
+
+
+
+    public ObjectNode pay(String BankName, String rib, double amount) throws InterruptedException {
+
+        String statusTransaction = "failed" ;
+
+        System.out.println("Withdrawal from account of " + BankName + " in the amount of " + amount);
+
+        //bankTransaction(kafka)
+        this.transactionStatus = bankTransaction.bankTransactionPub(BankName , rib, amount);
+
+        if (this.transactionStatus.equals("success")) {
+            statusTransaction = "success";
+        }
+
+        // Création d'un ObjectNode via ObjectMapper
+        ObjectNode response = mapper.createObjectNode();
+        response.put("bankName", BankName);
+        response.put("rib", rib);
+        response.put("amount", amount);
+        response.put("status", statusTransaction);
+
+        return response;
     }
 
 }

@@ -4,22 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.banque.PaymentBank;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-@Service
-public class CmiApiService {
+public class CmiApiServiceTest {
+
     private static final ObjectMapper mapper = new ObjectMapper();
-    PaymentBank  paymentBank;
 
-    CmiApiService(PaymentBank paymentBank) {
-        this.paymentBank = paymentBank;
-    }
-
-
-    public  ObjectNode getAccess(ObjectNode request) throws IOException {
+    public static ObjectNode getAccess(ObjectNode request) throws IOException {
         int targetId = request.get("id").asInt();
 
         try (InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/bankData.json")) {
@@ -39,12 +32,11 @@ public class CmiApiService {
         return null;
     }
 
-    public  ObjectNode userTransaction(ObjectNode transaction) throws IOException, InterruptedException {
+    public static ObjectNode userTransaction(ObjectNode transaction) throws IOException {
         int targetKey = transaction.get("key").asInt();
         String name = transaction.get("name").asText();
         String rib = transaction.get("rib").asText();
         String password = transaction.get("password").asText();
-        double amount = transaction.get("amount").asDouble();
         System.out.println(transaction);
 
         InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/bankData.json");
@@ -54,14 +46,15 @@ public class CmiApiService {
 
             JsonNode root = mapper.readTree(is);
             JsonNode banksArray = root.get("banks");
+
             System.out.println(banksArray);
 
             for (JsonNode bankNode : banksArray) {
                 if (bankNode.get("key").asInt() == targetKey) {
-                    String BankName = bankNode.get("name").asText();
+
                     PaymentBank.authenticate(name, password);
-                    
-                    return paymentBank.pay(BankName, rib, amount );
+                   System.out.println("payement success");
+                    return PaymentBank.pay(name, rib);
                 }
             }
 

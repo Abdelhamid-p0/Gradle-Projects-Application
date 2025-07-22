@@ -11,42 +11,37 @@ import java.io.IOException;
 @RequestMapping("/api/banks")
 public class CmiApiController {
 
+        CmiApiService cmiApiService;
+        CmiApiController(CmiApiService cmiApiService) {
+            this.cmiApiService = cmiApiService;
+        }
+
         @PostMapping("/{token}")
         public ObjectNode getBankAccess(@PathVariable String token , @RequestBody ObjectNode request) throws IOException {
              if (token.equals("0000")) {
-                 return  CmiApiService.getAccess(request);
+                 return  cmiApiService.getAccess(request);
              }
              /*
-             *    public static ObjectNode getAccess(ObjectNode request) throws IOException {
-        int targetId = request.get("id").asInt();
-
-        try (InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/dataBank.json")) {
-            if (is == null) {
-                throw new IOException("Fichier data/dataBank.json introuvable dans les ressources");
-            }
-
-            JsonNode root = mapper.readTree(is);
-            JsonNode banksArray = root.get("banks");
-
-            for (JsonNode bankNode : banksArray) {
-                if (bankNode.get("id").asInt() == targetId) {
-                    return (ObjectNode) bankNode;
-                }
-            }
-        }
-        return null;
-    }
-             *
-             * */
-
+             {
+              id : *int
+             }
+             - token pour verifier que l application est inscrit chez CMI
+             (On suppose que le seule site à pour id "0000")
+             - La fonction getAccess prend id pour verifier que la banque voulu est souscrie
+             + en mode active et pas en panne
+              */
             return null ; //Accées refusé
         }
 
         @PostMapping("/transaction")
-        public ObjectNode createTransaction(@RequestBody ObjectNode transaction) throws IOException {
-
-         return CmiApiService.userTransaction(transaction);
-
+        public ObjectNode createTransaction(@RequestBody ObjectNode transaction) throws IOException, InterruptedException {
+         /*
+         *("key").asInt();
+        ("name").asText();
+        ("rib").asText();
+        ("password").asText();
+        *("amount").asDouble(); */
+         return cmiApiService.userTransaction(transaction);
         }
 
 }
