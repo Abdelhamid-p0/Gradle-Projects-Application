@@ -1,13 +1,12 @@
 package com.PestationSante.prestationSante.controller;
 
 import com.PestationSante.prestationSante.service.ApiService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
+
+import java.util.Objects;
 
 @Controller
 public class FormController {
@@ -59,7 +58,7 @@ public class FormController {
              int idBank = 1;
             ObjectNode paiementReussi = apiService.traiterPaiementAPI(idBank , nom, rib, password);
 
-            if (paiementReussi != null) {
+            if (paiementReussi != null && Objects.equals(paiementReussi.get("status").asText(), "success")) {
                 // Paiement réussi
                 System.out.println(paiementReussi);
                 model.addAttribute("success", true);

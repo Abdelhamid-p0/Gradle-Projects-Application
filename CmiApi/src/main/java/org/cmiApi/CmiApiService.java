@@ -20,6 +20,8 @@ public class CmiApiService {
 
 
     public  ObjectNode getAccess(ObjectNode request) throws IOException {
+
+        System.out.println("1)- Vérification du droit d'accées au banque");
         int targetId = request.get("id").asInt();
 
         try (InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/bankData.json")) {
@@ -32,6 +34,8 @@ public class CmiApiService {
 
             for (JsonNode bankNode : banksArray) {
                 if (bankNode.get("id").asInt() == targetId) {
+                    System.out.println("2)- Droit d'accées vérifiées ");
+                    System.out.println("Bank data: "+bankNode);
                     return (ObjectNode) bankNode;
                 }
             }
@@ -45,7 +49,8 @@ public class CmiApiService {
         String rib = transaction.get("rib").asText();
         String password = transaction.get("password").asText();
         double amount = transaction.get("amount").asDouble();
-        System.out.println(transaction);
+
+        System.out.println("Transaction reçu: " +transaction);
 
         InputStream is = CmiApiService.class.getClassLoader().getResourceAsStream("data/bankData.json");
             if (is == null) {
@@ -54,13 +59,17 @@ public class CmiApiService {
 
             JsonNode root = mapper.readTree(is);
             JsonNode banksArray = root.get("banks");
-            System.out.println(banksArray);
 
             for (JsonNode bankNode : banksArray) {
+                System.out.println("1)- Vérifier le Key envoyé");
                 if (bankNode.get("key").asInt() == targetKey) {
+                    System.out.println("2)- Key correct");
                     String BankName = bankNode.get("name").asText();
+                    System.out.println("3)- Authentification d'utilisateur");
                     PaymentBank.authenticate(name, password);
-                    
+
+                    System.out.println("4)- Debut de l'opération du payement ");
+
                     return paymentBank.pay(BankName, rib, amount );
                 }
             }

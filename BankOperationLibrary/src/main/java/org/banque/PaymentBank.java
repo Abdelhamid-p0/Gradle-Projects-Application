@@ -24,7 +24,7 @@ public class PaymentBank {
     public static String authenticate(String name, String password) {
         // simulate hashing the password
         String hashed = DigestUtils.sha256Hex(password);
-        System.out.println("Authenticating user " + name + " with hash: " + hashed);
+        System.out.println("utilisateur authentifié par:  " + name + " avec code hashé: " + hashed);
         return hashed;
     }
 
@@ -34,12 +34,14 @@ public class PaymentBank {
 
         String statusTransaction = "failed" ;
 
-        System.out.println("Withdrawal from account of " + BankName + " in the amount of " + amount);
+        System.out.println("5)- Opération vers " + BankName + " avec un montant de " + amount +" dh");
 
         //bankTransaction(kafka)
         this.transactionStatus = bankTransaction.bankTransactionPub(BankName , rib, amount);
 
         if (this.transactionStatus.equals("success")) {
+
+            System.out.println("6)- Opération réussi");
             statusTransaction = "success";
         }
 
@@ -49,6 +51,8 @@ public class PaymentBank {
         response.put("rib", rib);
         response.put("amount", amount);
         response.put("status", statusTransaction);
+
+        System.out.println(response);
 
         return response;
     }

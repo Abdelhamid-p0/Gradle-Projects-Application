@@ -16,14 +16,21 @@ public class ApiService {
     public ObjectNode traiterPaiementAPI(int idBank, String nom, String rib, String password) {
         try {
             // Étape 1 : Vérifier l'accès bancaire
+            System.out.println("Requette pour vérifier l accées de la banque");
             ObjectNode accessRequest = createAccessRequest(idBank);
             ObjectNode accessResponse = callBankAccessAPI(accessRequest);
+            System.out.println("Requette: " + accessRequest);
+
+            System.out.println("Reponse: " + accessResponse);
 
 
             // Étape 2 : Créer la transaction
+            System.out.println("Requette pour Operation de paiement");
             ObjectNode transactionRequest = createTransactionRequest(nom, rib, password, accessResponse);
             ObjectNode transactionResponse = callTransactionAPI(transactionRequest);
 
+            System.out.println("Requette: " + transactionRequest);
+            System.out.println("Reponse: " + transactionResponse);
             return transactionResponse;
 
         } catch (Exception e) {
@@ -40,7 +47,7 @@ public class ApiService {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode request = mapper.createObjectNode();
         request.put("id", id);
-        System.out.println(request.toString());
+        System.out.println(request);
 
         return request;
     }
@@ -86,7 +93,6 @@ public class ApiService {
         if (accessResponse != null && accessResponse.has("key")) {
             transaction.put("key", accessResponse.get("key").asText());
         }
-        System.out.println(transaction);
         return transaction;
     }
 

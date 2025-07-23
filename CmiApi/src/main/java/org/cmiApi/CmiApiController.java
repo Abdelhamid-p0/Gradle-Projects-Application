@@ -19,6 +19,8 @@ public class CmiApiController {
         @PostMapping("/{token}")
         public ObjectNode getBankAccess(@PathVariable String token , @RequestBody ObjectNode request) throws IOException {
              if (token.equals("0000")) {
+                 System.out.println("**************************************** Payement vers cih **************************************");
+
                  return  cmiApiService.getAccess(request);
              }
              /*
@@ -41,7 +43,9 @@ public class CmiApiController {
         ("rib").asText();
         ("password").asText();
         *("amount").asDouble(); */
-         return cmiApiService.userTransaction(transaction);
+            System.out.println("**************************************** Debut de transaction vers cih **************************************");
+
+            return cmiApiService.userTransaction(transaction);
         }
 
 }

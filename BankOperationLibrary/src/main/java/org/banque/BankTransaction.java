@@ -18,7 +18,8 @@ public class BankTransaction {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private  String  topic ;
     private String   transactionStatus ;
-    private final CountDownLatch latch = new CountDownLatch(1);
+    private final Object lock = new Object();
+
 
     public BankTransaction(KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
@@ -31,15 +32,27 @@ public class BankTransaction {
         this.topic = BankName ;
 
         //publier Transaction
+        System.out.println("5/a)- Publier la transaction");
         TransactionEvent transactionEvent =  new TransactionEvent(rib, amount);
+        System.out.println("Transaction: " + transactionEvent);
         kafkaTemplate.send(topic,transactionEvent.toString());
 
         this.transactionStatus = "in progress";
+        System.out.println("5/b)- Attendre la reponse du banque via kafkaListnner" );
         //Attender la consommation du status
-        latch.await(5, TimeUnit.SECONDS);
+        synchronized (lock) {
+            long start = System.currentTimeMillis();
+            long timeout = 5000; // 5 secondes max
+            while ("in progress".equals(transactionStatus) && (System.currentTimeMillis() - start < timeout)) {
+                lock.wait(100); // attend avec réveil régulier
+            }
+        }
 
-        if  (!this.transactionStatus.equals("success")) {
-            this.transactionStatus = "failed";
+        if  (this.transactionStatus.equals("success")) {
+            System.out.println("6)- Opération réussi");
+        }
+        else {
+            System.out.println("Transaction échoué");
         }
 
         return transactionStatus;
@@ -47,10 +60,14 @@ public class BankTransaction {
     }
 
 
-    @KafkaListener(topics ="status-succes", groupId = "my-group")
+    @KafkaListener(topics ="status-success", groupId = "my-group")
     public String consume(String event) {
-
-        this.transactionStatus = "succes";
+        System.out.println("5/c)- Event entendue et consommer");
+        System.out.println("event: " + event);
+        synchronized (lock) {
+            this.transactionStatus = "success";
+            lock.notifyAll(); // réveille celui qui attend
+        }
         return event;
     }
 
